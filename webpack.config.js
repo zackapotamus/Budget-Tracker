@@ -8,8 +8,8 @@ const config = {
     db: "./public/db.js",
   },
   output: {
-    path: `${__dirname}public/dist`,
-    filename: "bundle.js",
+    path: __dirname + "/public/dist",
+    filename: "[name].bundle.js",
   },
   mode: "development",
   plugins: [

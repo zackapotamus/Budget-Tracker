@@ -1,7 +1,7 @@
 const FILES_TO_CACHE = [
   "/",
   "/index.html",
-  "/style.css",
+  "/styles.css",
   "/dist/index.bundle.js",
   "/dist/db.bundle.js",
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
@@ -9,6 +9,16 @@ const FILES_TO_CACHE = [
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0",
   "/icons/icon-192x192.png",
   "/icons/icon-512x512.png",
+  "/dist/icon_72x72.png",
+  "/dist/icon_96x96.png",
+  "/dist/icon_128x128.png",
+  "/dist/icon_144x144.png",
+  "/dist/icon_152x152.png",
+  "/dist/icon_192x192.png",
+  "/dist/icon_384x384.png",
+  "/dist/icon_512x512.png",
+  "/dist/manifest.json",
+  "/service-worker.js",
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff?v=4.7.0",
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.ttf?v=4.7.0",
 ];
@@ -55,22 +65,6 @@ self.addEventListener("fetch", (event) => {
     !event.request.url.startsWith(self.location.origin)
   ) {
     event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // handle runtime GET requests for data from /api routes
-  if (event.request.url.includes("/icons/")) {
-    // make network request and fallback to cache if network request fails (offline)
-    event.respondWith(
-      caches.open(RUNTIME_CACHE).then((cache) => {
-        return fetch(event.request)
-          .then((response) => {
-            cache.put(event.request, response.clone());
-            return response;
-          })
-          .catch(() => caches.match(event.request));
-      })
-    );
     return;
   }
 
