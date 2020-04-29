@@ -3,7 +3,7 @@ const FILES_TO_CACHE = [
   "/index.html",
   "/styles.css",
   "/dist/index.bundle.js",
-  "/dist/db.bundle.js",
+  // "/dist/db.bundle.js",
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css",
   "https://cdn.jsdelivr.net/npm/chart.js@2.8.0",
   "https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/fonts/fontawesome-webfont.woff2?v=4.7.0",
@@ -67,20 +67,56 @@ self.addEventListener("fetch", (event) => {
     event.respondWith(fetch(event.request));
     return;
   }
+  if (event.request.url.includes("/api/")) {
+    console.log("api request intercepted", event.request.url);
+    event.respondWith(
+      caches
+        .open(RUNTIME_CACHE)
+        .then((cache) => {
+          return fetch(event.request)
+            .then((response) => {
+              // If the response was good, clone it and store it in the cache.
+              if (response.status === 200) {
+                cache.put(event.request.url, response.clone());
+              }
+
+              return response;
+            })
+            .catch((err) => {
+              // Network request failed, try to get it from the cache.
+              console.log("fetch failed in service-worker", err);
+              return cache.match(event.request);
+            });
+        })
+        .catch((err) => {
+          console.log("error opening runtime_cache", err);
+        })
+    );
+
+    return;
+  }
 
   // use cache first for all other requests for performance
+  console.log("inside fetch event listener:", event.request);
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
+        console.log(" cached response found");
         return cachedResponse;
       }
 
       // request is not in cache. make network request and cache the response
+      console.log("no cached response for request:", event.request);
       return caches.open(RUNTIME_CACHE).then((cache) => {
+        console.log("do the fetch");
         return fetch(event.request).then((response) => {
-          return cache.put(event.request, response.clone()).then(() => {
-            return response;
-          });
+          console.log("cache the response:", response);
+          if (response.satatus === 200) {
+            return cache.put(event.request, response.clone()).then(() => {
+              return response;
+            });
+          }
+          return response;
         });
       });
     })

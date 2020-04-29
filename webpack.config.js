@@ -5,7 +5,7 @@ const config = {
   // Update the entry point
   entry: {
     index: "./public/index.js",
-    db: "./public/db.js",
+    // db: "./public/db.js",
   },
   output: {
     path: __dirname + "/public/dist",
